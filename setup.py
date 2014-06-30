@@ -15,13 +15,21 @@
 
 __author__ = 'ran'
 
+import json
+
 from setuptools import setup
+
+
+def find_version():
+    with open('VERSION', 'rb') as f:
+        return json.loads(f.read())['version']
+
 
 setup(
     name='cloudify-rest-client',
-    version='3.0',
-    author='ran',
-    author_email='ran@gigaspaces.com',
+    version=find_version(),
+    author='Gigaspaces',
+    author_email='cosmo-admin@gigaspaces.com',
     packages=['cloudify_rest_client'],
     license='LICENSE',
     description='Cloudify REST client',
