@@ -49,7 +49,12 @@ class HTTPClient(object):
                 message = '{0} [{1}]'.format(message, url)
             error_msg = '{0}: {1}'.format(response.status_code, message)
             raise CloudifyClientError(error_msg, response.status_code)
-        message = result['message']
+        if 'traceback' in result:
+            message = '{0}. REST server traceback:\n{1}'\
+                .format(result['message'],
+                        result['traceback'])
+        else:
+            message = result['message']
         code = result['error_code']
         if code == CreateDeploymentInProgressError.ERROR_CODE:
             raise CreateDeploymentInProgressError(message,
