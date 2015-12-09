@@ -18,6 +18,7 @@ import requests
 import logging
 
 from cloudify_rest_client import exceptions
+from cloudify_rest_client.agents import AgentsClient
 from cloudify_rest_client.blueprints import BlueprintsClient
 from cloudify_rest_client.snapshots import SnapshotsClient
 from cloudify_rest_client.deployments import DeploymentsClient
@@ -273,3 +274,4 @@ class CloudifyClient(object):
             self._client)
         self.tokens = TokensClient(self._client)
         self.plugins = PluginsClient(self._client)
+        self.agents = AgentsClient(self._client)
