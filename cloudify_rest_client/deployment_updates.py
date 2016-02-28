@@ -12,7 +12,15 @@
 #    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
+import os
+import tempfile
+import urllib
+import urlparse
 
+import shutil
+
+from cloudify_rest_client import bytes_stream_utils
+from cloudify_rest_client import utils
 from cloudify_rest_client.responses import ListResponse
 
 
@@ -64,23 +72,59 @@ class DeploymentUpdatesClient(object):
         items = [DeploymentUpdate(item) for item in response['items']]
         return ListResponse(items, response['metadata'])
 
-    def stage(self, deployment_id, blueprint=None):
-        """Create a deployment update transaction.
+    def stage(self, deployment_id, blueprint_path):
+        """Create a deployment update transaction for blueprint app.
 
         :param deployment_id: The deployment id
+        :param blueprint_path: the path of the blueprint to stage
+        """
+        assert deployment_id
+
+        tempdir = tempfile.mkdtemp()
+        try:
+            tar_path = utils.tar_blueprint(blueprint_path, tempdir)
+            application_filename = os.path.basename(blueprint_path)
+
+            return \
+                self.stage_archive(deployment_id,
+                                   tar_path,
+                                   application_filename)
+        finally:
+            shutil.rmtree(tempdir)
+
+    def stage_archive(self, deployment_id, archive_path,
+                      application_file_name=None, **kwargs):
+        """Create a deployment update transaction for an archived app.
+
+        :param archive_path: the path for the archived app.
+        :param application_file_name: the main blueprint filename.
+        :param deployment_id: the deployment id to update.
         :return: DeploymentUpdate dict
         :rtype: DeploymentUpdate
         """
-
         assert deployment_id
-        data = {
-            'deployment_id': deployment_id
+
+        query_params = {
+            'deployment_id': deployment_id,
         }
-        if blueprint is not None:
-            data['blueprint'] = blueprint
+        if application_file_name:
+            query_params['application_file_name'] = \
+                urllib.quote(application_file_name)
+
+        # For a Windows path (e.g. "C:\aaa\bbb.zip") scheme is the
+        # drive letter and therefore the 2nd condition is present
+        if all([urlparse.urlparse(archive_path).scheme,
+                os.path.exists(archive_path)]):
+            # archive location is URL
+            query_params['blueprint_archive_url'] = archive_path
+            data = None
+        else:
+            # archive location is a system path - upload it in chunks
+            data = \
+                bytes_stream_utils.request_data_file_stream_gen(archive_path)
 
         uri = '/deployment-updates'
-        response = self.api.post(uri, data,
+        response = self.api.post(uri, data, params=query_params,
                                  expected_status_code=201)
         return DeploymentUpdate(response)
 
