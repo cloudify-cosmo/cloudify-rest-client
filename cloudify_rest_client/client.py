@@ -282,6 +282,7 @@ class CloudifyClient(object):
             else:
                 port = DEFAULT_PORT
 
+        self._host = host
         self._client = HTTPClient(host, port, protocol, api_version,
                                   headers, query_params, cert, trust_all)
         self.blueprints = BlueprintsClient(self._client)
@@ -300,3 +301,7 @@ class CloudifyClient(object):
         self.plugins = PluginsClient(self._client)
         self.maintenance_mode = MaintenanceModeClient(self._client)
         self.deployment_updates = DeploymentUpdatesClient(self._client)
+
+    @property
+    def host(self):
+        return self._host
