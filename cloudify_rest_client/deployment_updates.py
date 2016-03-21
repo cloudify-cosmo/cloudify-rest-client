@@ -114,7 +114,7 @@ class DeploymentUpdatesClient(object):
         # For a Windows path (e.g. "C:\aaa\bbb.zip") scheme is the
         # drive letter and therefore the 2nd condition is present
         if all([urlparse.urlparse(archive_path).scheme,
-                os.path.exists(archive_path)]):
+                not os.path.exists(archive_path)]):
             # archive location is URL
             query_params['blueprint_archive_url'] = archive_path
             data = None
