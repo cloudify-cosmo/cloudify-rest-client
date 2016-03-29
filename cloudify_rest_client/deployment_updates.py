@@ -159,14 +159,25 @@ class DeploymentUpdatesClient(object):
                          entity_id=entity_id)
 
     def commit(self, update_id):
-        """Finish deployment update
+        """Start the commit processes
 
         :param update_id: The update id
         """
 
         assert update_id
-        uri = '/deployment-updates/{0}/commit'\
-            .format(update_id)
+        uri = '/deployment-updates/{0}/commit'.format(update_id)
+        response = self.api.post(uri)
+        return DeploymentUpdate(response)
+
+    def finalize_commit(self, update_id):
+        """Finalize the commiting process
+
+        :param update_id:
+        :return:
+        """
+        assert update_id
+
+        uri = '/deployment-updates/{0}/finalize_commit'.format(update_id)
         response = self.api.post(uri)
         return DeploymentUpdate(response)
 
