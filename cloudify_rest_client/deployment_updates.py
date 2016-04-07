@@ -158,6 +158,12 @@ class DeploymentUpdatesClient(object):
                          entity_type=entity_type,
                          entity_id=entity_id)
 
+    def modify(self, update_id, entity_type, entity_id):
+        return self.step(update_id,
+                         operation='modify',
+                         entity_type=entity_type,
+                         entity_id=entity_id)
+
     def commit(self, update_id):
         """Start the commit processes
 
