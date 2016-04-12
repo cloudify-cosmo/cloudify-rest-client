@@ -21,26 +21,26 @@ class DeploymentModificationNodeInstances(dict):
 
     def __init__(self, node_instances):
         self.update(node_instances)
-        self['added_and_targeted'] = \
+        self['added_and_related'] = \
             [NodeInstance(instance) for instance
-             in self.get('added_and_targeted', [])]
-        self['removed_and_targeted'] = \
+             in self.get('added_and_related', [])]
+        self['removed_and_related'] = \
             [NodeInstance(instance) for instance
-             in self.get('removed_and_targeted', [])]
+             in self.get('removed_and_related', [])]
         self['before_modification'] = [NodeInstance(instance) for instance
                                        in self.get('before_modification', [])]
         self['before_rollback'] = [NodeInstance(instance) for instance
                                    in self.get('before_rollback', [])]
 
     @property
-    def added_and_targeted(self):
+    def added_and_related(self):
         """List of added nodes and nodes that are related to them"""
-        return self['added_and_targeted']
+        return self['added_and_related']
 
     @property
-    def removed_and_targeted(self):
+    def removed_and_related(self):
         """List of removed nodes and nodes that are related to them"""
-        return self['removed_and_targeted']
+        return self['removed_and_related']
 
     @property
     def before_modification(self):
@@ -84,7 +84,7 @@ class DeploymentModification(dict):
 
     @property
     def node_instances(self):
-        """Dict containing added_and_targeted and remove_and_targeted node
+        """Dict containing added_and_related and remove_and_related node
         instances list"""
         return self['node_instances']
 
