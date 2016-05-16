@@ -72,7 +72,7 @@ class DeploymentUpdatesClient(object):
         items = [DeploymentUpdate(item) for item in response['items']]
         return ListResponse(items, response['metadata'])
 
-    def stage(self, deployment_id, blueprint_path):
+    def stage(self, deployment_id, blueprint_path, inputs=None):
         """Create a deployment update transaction for blueprint app.
 
         :param deployment_id: The deployment id
@@ -88,12 +88,13 @@ class DeploymentUpdatesClient(object):
             return \
                 self.stage_archive(deployment_id,
                                    tar_path,
-                                   application_filename)
+                                   application_filename,
+                                   inputs=inputs)
         finally:
             shutil.rmtree(tempdir)
 
     def stage_archive(self, deployment_id, archive_path,
-                      application_file_name=None, **kwargs):
+                      application_file_name=None, inputs=None, **kwargs):
         """Create a deployment update transaction for an archived app.
 
         :param archive_path: the path for the archived app.
@@ -107,6 +108,12 @@ class DeploymentUpdatesClient(object):
         query_params = {
             'deployment_id': deployment_id,
         }
+
+        # all the inputs are passed through the query
+        if inputs:
+            for k, v in inputs.iteritems():
+                query_params['_{0}'.format(k)] = v
+
         if application_file_name:
             query_params['application_file_name'] = \
                 urllib.quote(application_file_name)
