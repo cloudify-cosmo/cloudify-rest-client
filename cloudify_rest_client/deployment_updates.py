@@ -171,15 +171,21 @@ class DeploymentUpdatesClient(object):
                          entity_type=entity_type,
                          entity_id=entity_id)
 
-    def commit(self, update_id):
+    def commit(self, update_id, workflow_id=None):
         """Start the commit processes
 
         :param update_id: The update id
         """
 
         assert update_id
+
+        # TODO: rebase over Avia's changes and add the workflows to update
+        # TODO: endpoint, which will pass it to the commit
+        params = {}
+        if workflow_id:
+            params['workflow_id'] = workflow_id
         uri = '/deployment-updates/{0}/commit'.format(update_id)
-        response = self.api.post(uri)
+        response = self.api.post(uri, params)
         return DeploymentUpdate(response)
 
     def finalize_commit(self, update_id):
