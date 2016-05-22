@@ -171,19 +171,26 @@ class DeploymentUpdatesClient(object):
                          entity_type=entity_type,
                          entity_id=entity_id)
 
-    def commit(self, update_id, workflow_id=None):
+    def commit(self,
+               update_id,
+               skip_install=False,
+               skip_uninstall=False,
+               workflow_id=None):
         """Start the commit processes
 
+        :param skip_install:
+        :param skip_uninstall:
+        :param workflow_id:
         :param update_id: The update id
         """
-
         assert update_id
 
-        # TODO: rebase over Avia's changes and add the workflows to update
-        # TODO: endpoint, which will pass it to the commit
-        params = {}
-        if workflow_id:
-            params['workflow_id'] = workflow_id
+        params = {
+            'workflow_id': workflow_id,
+            'skip_install': skip_install,
+            'skip_uninstall': skip_uninstall
+        }
+
         uri = '/deployment-updates/{0}/commit'.format(update_id)
         response = self.api.post(uri, params)
         return DeploymentUpdate(response)
