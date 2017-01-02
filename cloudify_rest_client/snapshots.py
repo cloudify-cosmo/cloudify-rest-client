@@ -117,7 +117,7 @@ class SnapshotsClient(object):
         return Snapshot(response)
 
     def restore(self, snapshot_id, recreate_deployments_envs=True,
-                force=False):
+                force=False, timeout=60):
         """
         Restores the snapshot whose id matches the provided snapshot id.
 
@@ -126,11 +126,13 @@ class SnapshotsClient(object):
         deployment environments.
         :param force: Skip clearing the manager and checking whether it is
         actually clean.
+        :param timeout: elasticsearch bulk operation timeout in seconds.
         """
         assert snapshot_id
         uri = '/snapshots/{0}/restore'.format(snapshot_id)
         params = {'recreate_deployments_envs': recreate_deployments_envs,
-                  'force': force}
+                  'force': force,
+                  'timeout': timeout}
         response = self.api.post(uri, data=params)
         return Execution(response)
 
