@@ -81,3 +81,17 @@ class LdapClient(object):
         uri = '/ldap'
         response = self.api.post(uri, params)
         return LdapResponse(response)
+
+    def unset(self, force=False):
+        """
+        Unset the Cloudify manager's LDAP authenticator.
+
+        :param force: Will remove all existing LDAP users and unset the LDAP
+        authenticator.
+        :return: Previous LDAP configuration.
+        """
+        data = {
+            'force': force
+        }
+        response = self.api.delete('/ldap', data=data)
+        return LdapResponse(response)
