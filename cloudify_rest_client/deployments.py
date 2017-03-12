@@ -185,11 +185,13 @@ class DeploymentsClient(object):
                blueprint_id,
                deployment_id,
                inputs=None,
-               private_resource=False):
+               private_resource=False,
+               skip_plugins_validation=False):
         """
         Creates a new deployment for the provided blueprint id and
         deployment id.
 
+        :param skip_plugins_validation:
         :param blueprint_id: Blueprint id to create a deployment of.
         :param deployment_id: Deployment id of the new created deployment.
         :param inputs: Inputs dict for the deployment.
@@ -202,6 +204,7 @@ class DeploymentsClient(object):
         data = {'blueprint_id': blueprint_id}
         if inputs:
             data['inputs'] = inputs
+        data['skip_plugins_validation'] = skip_plugins_validation
         uri = '/deployments/{0}'.format(deployment_id)
         response = self.api.put(uri, data, params=params,
                                 expected_status_code=201)
