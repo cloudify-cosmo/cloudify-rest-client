@@ -191,14 +191,15 @@ class DeploymentsClient(object):
         Creates a new deployment for the provided blueprint id and
         deployment id.
 
-        :param skip_plugins_validation: True - install plugin from source in
-                                        case it's not installed yet
-                                        False - plugins are not installed
-                                        automatically from source
         :param blueprint_id: Blueprint id to create a deployment of.
         :param deployment_id: Deployment id of the new created deployment.
         :param inputs: Inputs dict for the deployment.
         :param private_resource: Whether the deployment should be private
+        :param skip_plugins_validation: Determines whether to validate required
+                                deployment plugins exists on the
+                                manager. If validation is skipped
+                                plugins containing source URL will
+                                be installed from source.
         :return: The created deployment.
         """
         assert blueprint_id
