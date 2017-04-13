@@ -195,9 +195,9 @@ class DeploymentsClient(object):
         :param deployment_id: Deployment id of the new created deployment.
         :param inputs: Inputs dict for the deployment.
         :param private_resource: Whether the deployment should be private
-        :param skip_plugins_validation: Determines whether to validate required
-                                deployment plugins exists on the
-                                manager. If validation is skipped
+        :param skip_plugins_validation: Determines whether to validate if the
+                                required deployment plugins exist on the
+                                manager. If validation is skipped,
                                 plugins containing source URL will
                                 be installed from source.
         :return: The created deployment.
