@@ -162,7 +162,7 @@ class NodeInstancesClient(object):
         :param kwargs: Optional filter fields. for a list of available fields
                see the REST service's models.DeploymentNodeInstance.fields
         :return: Node instances.
-        :rtype: list
+        :rtype: :class:`list`
         """
         params = {}
         if node_name:

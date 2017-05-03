@@ -62,7 +62,7 @@ class Node(dict):
     def relationships(self):
         """
         :return: The node relationships with other nodes.
-        :rtype: list
+        :rtype: :class:`list`
         """
         return self.get('relationships')
 
@@ -127,7 +127,7 @@ class Node(dict):
     def type_hierarchy(self):
         """
         :return: The type hierarchy of this node.
-        :rtype: list
+        :rtype: :class:`list`
         """
         return self['type_hierarchy']
 
@@ -161,7 +161,7 @@ class NodesClient(object):
                see the REST service's models.DeploymentNode.fields
         :param evaluate_functions: Evaluate intrinsic functions
         :return: Nodes.
-        :rtype: list
+        :rtype: :class:`list`
         """
         params = {'_evaluate_functions': evaluate_functions}
         if deployment_id:
