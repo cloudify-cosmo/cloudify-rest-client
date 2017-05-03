@@ -17,13 +17,11 @@ import os
 import tempfile
 import shutil
 import urllib
-import urlparse
 import contextlib
 
 
-from cloudify_rest_client import bytes_stream_utils
+from cloudify_rest_client import urlparse, utils, bytes_stream_utils
 from cloudify_rest_client.responses import ListResponse
-from cloudify_rest_client import utils
 
 
 class Blueprint(dict):

@@ -14,10 +14,10 @@
 #    * limitations under the License.
 
 import os
-import urlparse
 import contextlib
 
-from cloudify_rest_client import bytes_stream_utils
+
+from cloudify_rest_client import urlparse, bytes_stream_utils
 from cloudify_rest_client.executions import Execution
 from cloudify_rest_client.responses import ListResponse
 

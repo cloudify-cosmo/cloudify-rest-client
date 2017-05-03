@@ -16,13 +16,13 @@ import os
 import json
 import urllib
 import shutil
-import urlparse
 import tempfile
 from mimetypes import MimeTypes
 
+
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 
-from cloudify_rest_client import utils
+from cloudify_rest_client import urlparse, utils
 from cloudify_rest_client.responses import ListResponse
 
 

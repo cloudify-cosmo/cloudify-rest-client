@@ -16,4 +16,10 @@
 __author__ = 'idanmo'
 
 
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    import urlparse  # noqa
+
+
 from cloudify_rest_client.client import CloudifyClient  # noqa
