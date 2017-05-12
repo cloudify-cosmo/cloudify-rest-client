@@ -15,6 +15,7 @@
 
 import json
 import logging
+import collections
 
 import requests
 from base64 import urlsafe_b64encode
@@ -56,6 +57,19 @@ CLOUDIFY_AUTHENTICATION_HEADER = 'Authorization'
 CLOUDIFY_TOKEN_AUTHENTICATION_HEADER = 'Authentication-Token'
 
 urllib3.disable_warnings(urllib3.exceptions.InsecurePlatformWarning)
+
+
+class ABCSerializingEncoder(json.JSONEncoder):
+    """A JSONEncoder that can handle the builtin abstract base classes.
+
+    We want to serialize a Mapping like a dict, and a Sequence like a list.
+    """
+    def default(self, obj):
+        if isinstance(obj, collections.Sequence):
+            return list(obj)
+        if isinstance(obj, collections.Mapping):
+            return dict(obj)
+        return super(ABCSerializingEncoder, self).default(obj)
 
 
 class HTTPClient(object):
@@ -199,7 +213,8 @@ class HTTPClient(object):
 
         # data is either dict, bytes data or None
         is_dict_data = isinstance(data, dict)
-        body = json.dumps(data) if is_dict_data else data
+        body = json.dumps(data, cls=ABCSerializingEncoder) \
+            if is_dict_data else data
         if self.logger.isEnabledFor(logging.DEBUG):
             log_message = 'Sending request: {0} {1}'.format(
                 requests_method.func_name.upper(),
