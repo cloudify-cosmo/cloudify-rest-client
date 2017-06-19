@@ -167,7 +167,7 @@ class SnapshotsClient(object):
             'force': force,
             'tenant_name': tenant_name,
             'restore_certificates': restore_certificates,
-            'no_reboot': no_reboot
+            'no_reboot': no_reboot,
         }
         response = self.api.post(uri, data=params)
         return Execution(response)
@@ -258,3 +258,6 @@ class SnapshotsClient(object):
             'permission': permission
         }
         return self.api.delete('/permissions', data=params)
+
+    def _restore_deployment_environments(self):
+        return self.api.post('/snapshots/_dep_env_restore')
