@@ -49,7 +49,7 @@ DEFAULT_PORT = 80
 SECURED_PORT = 443
 SECURED_PROTOCOL = 'https'
 DEFAULT_PROTOCOL = 'http'
-DEFAULT_API_VERSION = 'v3'
+DEFAULT_API_VERSION = 'v3.1'
 BASIC_AUTH_PREFIX = 'Basic'
 CLOUDIFY_TENANT_HEADER = 'Tenant'
 CLOUDIFY_AUTHENTICATION_HEADER = 'Authorization'
@@ -113,18 +113,20 @@ class HTTPClient(object):
             message=message,
             error_code=code,
             status_code=response.status_code,
-            server_traceback=server_traceback)
+            server_traceback=server_traceback,
+            response=response)
 
     @staticmethod
     def _prepare_and_raise_exception(message,
                                      error_code,
                                      status_code,
-                                     server_traceback=None):
+                                     server_traceback=None,
+                                     response=None):
 
         error = exceptions.ERROR_MAPPING.get(error_code,
                                              exceptions.CloudifyClientError)
         raise error(message, server_traceback,
-                    status_code, error_code=error_code)
+                    status_code, error_code=error_code, response=response)
 
     def verify_response_status(self, response, expected_code=200):
         if response.status_code != expected_code:
@@ -164,11 +166,14 @@ class HTTPClient(object):
         return response_json
 
     def get_request_verify(self):
+        # disable certificate verification if user asked us to.
+        if self.trust_all:
+            return False
+        # verify will hold the path to the self-signed certificate
         if self.cert:
-            # verify will hold the path to the self-signed certificate
             return self.cert
-        # certificate verification is required iff trust_all is False
-        return not self.trust_all
+        # verify the certificate
+        return True
 
     def do_request(self,
                    requests_method,

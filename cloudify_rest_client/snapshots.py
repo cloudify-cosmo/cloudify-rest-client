@@ -143,7 +143,9 @@ class SnapshotsClient(object):
                 snapshot_id,
                 recreate_deployments_envs=True,
                 force=False,
-                tenant_name=None):
+                tenant_name=None,
+                restore_certificates=False,
+                no_reboot=False):
         """
         Restores the snapshot whose id matches the provided snapshot id.
 
@@ -153,14 +155,19 @@ class SnapshotsClient(object):
         :param force: Skip clearing the manager and checking whether it is
         actually clean.
         :param tenant_name: Name of the tenant to which old (pre 4.0)
-        snapshots should be restored
+        snapshots should be restored.
+        :param restore_certificates: Whether to try and restore the
+        certificates from the snapshot.
+        :param no_reboot: Do not reboot after certificates restore.
         """
         assert snapshot_id
         uri = '/snapshots/{0}/restore'.format(snapshot_id)
         params = {
             'recreate_deployments_envs': recreate_deployments_envs,
             'force': force,
-            'tenant_name': tenant_name
+            'tenant_name': tenant_name,
+            'restore_certificates': restore_certificates,
+            'no_reboot': no_reboot
         }
         response = self.api.post(uri, data=params)
         return Execution(response)
