@@ -29,21 +29,34 @@ def request_data_file_stream_gen(file_path,
     :param progress_callback: Callback function - can be used to print progress
     :return: Generator object
     """
-    total_bytes_read = 0
-    total_file_size = os.path.getsize(file_path)
+    return _DataFileStream(file_path, buffer_size, progress_callback)
 
-    with open(file_path, 'rb') as f:
-        while True:
-            read_bytes = f.read(buffer_size)
-            read_bytes_len = len(read_bytes)
 
-            if progress_callback:
-                total_bytes_read += read_bytes_len
-                progress_callback(total_bytes_read, total_file_size)
+class _DataFileStream(object):
+    def __init__(self, file_path, buffer_size, progress_callback):
+        self._file_path = file_path
+        self._buffer_size = buffer_size
+        self._progress_callback = progress_callback
 
-            yield read_bytes
-            if read_bytes_len < buffer_size:
-                return
+    def __iter__(self):
+        return self._generate_stream()
+
+    def _generate_stream(self):
+        total_bytes_read = 0
+        total_file_size = os.path.getsize(self._file_path)
+
+        with open(self._file_path, 'rb') as f:
+            while True:
+                read_bytes = f.read(self._buffer_size)
+                read_bytes_len = len(read_bytes)
+
+                if self._progress_callback:
+                    total_bytes_read += read_bytes_len
+                    self._progress_callback(total_bytes_read, total_file_size)
+
+                yield read_bytes
+                if read_bytes_len < self._buffer_size:
+                    return
 
 
 def write_response_stream_to_file(streamed_response,
