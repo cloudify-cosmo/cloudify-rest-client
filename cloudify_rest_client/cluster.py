@@ -174,6 +174,18 @@ class ClusterNodesClient(object):
         response = self.api.get('/cluster/nodes/{0}'.format(node_id))
         return ClusterNode(response)
 
+    def update(self, node_id, options):
+        """
+        Update a cluster nodes's settings
+
+        :param node_id: ID of the node to be updated
+        :param options: a dict of new node options
+        :return: details of the node
+        """
+        response = self.api.patch('/cluster/nodes/{0}'.format(node_id),
+                                  data=options)
+        return ClusterNode(response)
+
     def delete(self, node_id):
         """
         Remove a node from the HA cluster.
