@@ -107,8 +107,14 @@ class TenantsClient(object):
         response = self.api.delete('/tenants/users', data=data)
         return Tenant(response)
 
-    def add_group(self, group_name, tenant_name):
-        data = {'group_name': group_name, 'tenant_name': tenant_name}
+    def add_group(self, group_name, tenant_name, role=None):
+        if role is None:
+            role = DEFAULT_TENANT_ROLE
+        data = {
+            'group_name': group_name,
+            'tenant_name': tenant_name,
+            'role': role,
+        }
         response = self.api.put('/tenants/user-groups', data=data)
         return Tenant(response)
 
