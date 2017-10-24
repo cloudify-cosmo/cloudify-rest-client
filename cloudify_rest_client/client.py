@@ -59,6 +59,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecurePlatformWarning)
 
 
 class HTTPClient(object):
+    default_timeout_sec = None
 
     def __init__(self, host, port=DEFAULT_PORT,
                  protocol=DEFAULT_PROTOCOL, api_version=DEFAULT_API_VERSION,
@@ -140,7 +141,7 @@ class HTTPClient(object):
                                    headers=headers,
                                    stream=stream,
                                    verify=verify,
-                                   timeout=timeout)
+                                   timeout=timeout or self.default_timeout_sec)
         if self.logger.isEnabledFor(logging.DEBUG):
             for hdr, hdr_content in response.request.headers.iteritems():
                 self.logger.debug('request header:  %s: %s'
@@ -214,11 +215,25 @@ class HTTPClient(object):
             elif data is not None:
                 log_message += '; body: bytes data'
             self.logger.debug(log_message)
-        return self._do_request(
-            requests_method=requests_method, request_url=request_url,
-            body=body, params=total_params, headers=total_headers,
-            expected_status_code=expected_status_code, stream=stream,
-            verify=self.get_request_verify(), timeout=timeout)
+        try:
+            return self._do_request(
+                requests_method=requests_method, request_url=request_url,
+                body=body, params=total_params, headers=total_headers,
+                expected_status_code=expected_status_code, stream=stream,
+                verify=self.get_request_verify(), timeout=timeout)
+        except requests.exceptions.SSLError:
+            raise requests.exceptions.SSLError(
+                'Invalid certificate error: The local copy of the rest public '
+                'certificate does not match the certificate on the manager. '
+                'This could either mean you are using the wrong certificate '
+                'file, or that you are not communicating with the correct '
+                'Cloudify Manager.'
+            )
+        except requests.exceptions.ConnectionError as e:
+            raise requests.exceptions.ConnectionError(
+                '{0}\nThis can happen when the manager is not working with '
+                'SSL, but the client does'.format(e)
+            )
 
     def get(self, uri, data=None, params=None, headers=None, _include=None,
             expected_status_code=200, stream=False, versioned_url=True,

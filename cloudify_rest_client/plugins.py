@@ -197,17 +197,22 @@ class PluginsClient(object):
 
         uri = '/plugins'
         query_params = {'private_resource': private_resource}
-
+        timeout = self.api.default_timeout_sec
         if urlparse.urlparse(plugin_path).scheme and \
                 not os.path.exists(plugin_path):
             query_params['plugin_archive_url'] = plugin_path
             data = None
+            # if we have a timeout set, let's only use a connect timeout,
+            # and skip the read timeout - this request can take a long
+            # time before the server actually returns a response
+            if timeout is not None and isinstance(timeout, (int, float)):
+                timeout = (timeout, None)
         else:
             data = bytes_stream_utils.request_data_file_stream_gen(
                 plugin_path, progress_callback=progress_callback)
 
         response = self.api.post(uri, params=query_params, data=data,
-                                 expected_status_code=201)
+                                 expected_status_code=201, timeout=timeout)
         return Plugin(response)
 
     def download(self, plugin_id, output_file, progress_callback=None):
@@ -227,20 +232,11 @@ class PluginsClient(object):
 
             return output_file
 
-    def add_permission(self, plugin_id, users, permission):
-        params = {
-            'resource_type': 'plugin',
-            'resource_id': plugin_id,
-            'users': users,
-            'permission': permission
-        }
-        return self.api.put('/permissions', data=params)
+    def set_global(self, plugin_id):
+        """
+        Updates the plugin's availability to global
 
-    def remove_permission(self, plugin_id, users, permission):
-        params = {
-            'resource_type': 'plugin',
-            'resource_id': plugin_id,
-            'users': users,
-            'permission': permission
-        }
-        return self.api.delete('/permissions', data=params)
+        :param plugin_id: Plugin's id to update.
+        :return: The plugin.
+        """
+        return self.api.patch('/plugins/{0}/set-global'.format(plugin_id))

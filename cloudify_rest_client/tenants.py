@@ -15,6 +15,8 @@
 
 from cloudify_rest_client.responses import ListResponse
 
+DEFAULT_TENANT_ROLE = 'user'
+
 
 class Tenant(dict):
 
@@ -78,9 +80,45 @@ class TenantsClient(object):
 
         return Tenant(response)
 
-    def add_user(self, username, tenant_name):
-        data = {'username': username, 'tenant_name': tenant_name}
+    def add_user(self, username, tenant_name, role=None):
+        """Add user to a tenant.
+
+        Optionally, set the role of the user in the context of the tenant in
+        which it has been added.
+
+        :param username: Name of the user to add to the tenant
+        :param tenant_name: Name of the tenant to which the user is added
+        :param role: Name of the role assigned to the user in the tenant
+
+        """
+        if role is None:
+            role = DEFAULT_TENANT_ROLE
+
+        data = {
+            'username': username,
+            'tenant_name': tenant_name,
+            'role': role,
+        }
         response = self.api.put('/tenants/users', data=data)
+        return Tenant(response)
+
+    def update_user(self, username, tenant_name, role):
+        """Update user in a tenant.
+
+        :param username: Name of the user to add to the tenant
+        :type username: str
+        :param tenant_name: Name of the tenant to which the user is added
+        :type tenant_name: str
+        :param role: Name of the role assigned to the user in the tenant
+        :type role: str
+
+        """
+        data = {
+            'username': username,
+            'tenant_name': tenant_name,
+            'role': role,
+        }
+        response = self.api.patch('/tenants/users', data=data)
         return Tenant(response)
 
     def remove_user(self, username, tenant_name):
@@ -88,9 +126,44 @@ class TenantsClient(object):
         response = self.api.delete('/tenants/users', data=data)
         return Tenant(response)
 
-    def add_group(self, group_name, tenant_name):
-        data = {'group_name': group_name, 'tenant_name': tenant_name}
+    def add_group(self, group_name, tenant_name, role=None):
+        """Add group to a tenant.
+
+        Optionally, set the role that will be assigned to the users members of
+        the group that is added to the tenant.
+
+        :param group_name: Name of the group to add to the tenant
+        :param tenant_name: Name of the tenant to which the group is added
+        :param role: Name of the role assigned to the members of the group
+
+        """
+        if role is None:
+            role = DEFAULT_TENANT_ROLE
+        data = {
+            'group_name': group_name,
+            'tenant_name': tenant_name,
+            'role': role,
+        }
         response = self.api.put('/tenants/user-groups', data=data)
+        return Tenant(response)
+
+    def update_group(self, group_name, tenant_name, role):
+        """Update group in a tenant.
+
+        :param group_name: Name of the user to add to the tenant
+        :type group_name: str
+        :param tenant_name: Name of the tenant to which the user is added
+        :type tenant_name: str
+        :param role: Name of the role assigned to the user in the tenant
+        :type role: str
+
+        """
+        data = {
+            'group_name': group_name,
+            'tenant_name': tenant_name,
+            'role': role,
+        }
+        response = self.api.patch('/tenants/user-groups', data=data)
         return Tenant(response)
 
     def remove_group(self, group_name, tenant_name):

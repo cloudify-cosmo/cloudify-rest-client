@@ -83,6 +83,21 @@ class UnknownDeploymentInputError(CloudifyClientError):
     ERROR_CODE = 'unknown_deployment_input_error'
 
 
+class UnknownDeploymentSecretError(CloudifyClientError):
+    """
+    Raised when a required secret was not found on deployment creation.
+    """
+    ERROR_CODE = 'unknown_deployment_secret_error'
+
+
+class UnsupportedDeploymentGetSecretError(CloudifyClientError):
+    """
+    Raised when an unsupported get_secret intrinsic function appears in
+    the blueprint on deployment creation.
+    """
+    ERROR_CODE = 'unsupported_deployment_get_secret_error'
+
+
 class FunctionsEvaluationError(CloudifyClientError):
     """
     Raised when function evaluation failed.
@@ -192,6 +207,17 @@ class NotClusterMaster(CloudifyClientError):
     ERROR_CODE = 'not_cluster_master'
 
 
+class RemovedFromCluster(CloudifyClientError):
+    """
+    Raised when attempting to contact a manager that was removed from a
+    cluster.
+    The client should retry the request with another manager in the cluster.
+    If the client stores the server address, it should remove this node's
+    address from storage.
+    """
+    ERROR_CODE = 'removed_from_cluster'
+
+
 class DeploymentPluginNotFound(CloudifyClientError):
     """
     Raised when a plugin is listed in the blueprint but is not
@@ -209,6 +235,8 @@ ERROR_MAPPING = dict([
         NoSuchIncludeFieldError,
         MissingRequiredDeploymentInputError,
         UnknownDeploymentInputError,
+        UnknownDeploymentSecretError,
+        UnsupportedDeploymentGetSecretError,
         FunctionsEvaluationError,
         UnknownModificationStageError,
         ExistingStartedDeploymentModificationError,
@@ -222,4 +250,5 @@ ERROR_MAPPING = dict([
         PluginInstallationError,
         PluginInstallationTimeout,
         NotClusterMaster,
+        RemovedFromCluster,
         DeploymentPluginNotFound]])
