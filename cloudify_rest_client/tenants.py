@@ -156,6 +156,14 @@ class TenantsClient(object):
         return Tenant(response)
 
     def remove_user_group(self, group_name, tenant_name):
+        """Remove user group from tenant.
+
+        :param group_name: Name of the user to add to the tenant
+        :type group_name: str
+        :param tenant_name: Name of the tenant to which the user is added
+        :type tenant_name: str
+
+        """
         data = {'group_name': group_name, 'tenant_name': tenant_name}
         response = self.api.delete('/tenants/user-groups', data=data)
         return Tenant(response)
