@@ -141,7 +141,7 @@ class TenantsClient(object):
 
         :param group_name: Name of the user to add to the tenant
         :type group_name: str
-        :param tenant_name: Name of the tenant to which the user is added
+        :param tenant_name: Name of the tenant to which the group is added
         :type tenant_name: str
         :param role: Name of the role assigned to the user in the tenant
         :type role: str
