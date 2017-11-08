@@ -56,10 +56,12 @@ class SecretsClient(object):
     def __init__(self, api):
         self.api = api
 
-    def create(self, key, value):
+    def create(self, key, value, private_resource=False):
+        query_params = {'private_resource': private_resource}
         data = {'value': value}
-        response = self.api.put('/secrets/{0}'.format(key), data=data)
-
+        response = self.api.put('/secrets/{0}'.format(key),
+                                params=query_params,
+                                data=data)
         return Secret(response)
 
     def update(self, key, value):
