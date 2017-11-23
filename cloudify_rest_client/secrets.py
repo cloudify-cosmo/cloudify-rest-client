@@ -58,6 +58,18 @@ class SecretsClient(object):
         self.api = api
 
     def create(self, key, value, upsert):
+        """Create secret.
+
+        :param key: Secret key
+        :type key: unicode
+        :param value: Secret value
+        :type value: unicode
+        :param upsert: Update secret if it already exists
+        :type upsert: bool
+        :returns: New secret metadata
+        :rtype: Dict[str]
+
+        """
         data = {
             'value': value,
             'upsert': upsert,
