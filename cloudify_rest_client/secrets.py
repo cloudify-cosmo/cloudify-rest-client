@@ -57,8 +57,11 @@ class SecretsClient(object):
     def __init__(self, api):
         self.api = api
 
-    def create(self, key, value):
-        data = {'value': value}
+    def create(self, key, value, upsert):
+        data = {
+            'value': value,
+            'upsert': upsert,
+        }
         response = self.api.put('/secrets/{0}'.format(key), data=data)
 
         return Secret(response)
