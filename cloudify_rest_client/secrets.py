@@ -57,7 +57,7 @@ class SecretsClient(object):
     def __init__(self, api):
         self.api = api
 
-    def create(self, key, value, upsert):
+    def create(self, key, value, upsert=False):
         """Create secret.
 
         :param key: Secret key
