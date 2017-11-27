@@ -57,22 +57,23 @@ class SecretsClient(object):
     def __init__(self, api):
         self.api = api
 
-    def create(self, key, value, upsert=False):
+    def create(self, key, value, update_if_exists=False):
         """Create secret.
 
         :param key: Secret key
         :type key: unicode
         :param value: Secret value
         :type value: unicode
-        :param upsert: Update secret if it already exists
-        :type upsert: bool
+        :param update_if_exists:
+            Update secret value if secret key already exists
+        :type update_if_exists: bool
         :returns: New secret metadata
         :rtype: Dict[str]
 
         """
         data = {
             'value': value,
-            'upsert': upsert,
+            'update_if_exists': update_if_exists,
         }
         response = self.api.put('/secrets/{0}'.format(key), data=data)
 
