@@ -43,13 +43,14 @@ from cloudify_rest_client.users import UsersClient
 from cloudify_rest_client.cluster import ClusterClient
 from cloudify_rest_client.ldap import LdapClient
 from cloudify_rest_client.secrets import SecretsClient
+from cloudify_rest_client.agents import AgentsClient
 
 
 DEFAULT_PORT = 80
 SECURED_PORT = 443
 SECURED_PROTOCOL = 'https'
 DEFAULT_PROTOCOL = 'http'
-DEFAULT_API_VERSION = 'v3.1'
+DEFAULT_API_VERSION = 'v3.2'
 BASIC_AUTH_PREFIX = 'Basic'
 CLOUDIFY_TENANT_HEADER = 'Tenant'
 CLOUDIFY_AUTHENTICATION_HEADER = 'Authorization'
@@ -390,3 +391,4 @@ class CloudifyClient(object):
         self.cluster = ClusterClient(self._client)
         self.ldap = LdapClient(self._client)
         self.secrets = SecretsClient(self._client)
+        self.agents = AgentsClient(self._client)
