@@ -15,6 +15,8 @@
 
 from cloudify_rest_client.responses import ListResponse
 
+DEFAULT_TENANT_ROLE = 'user'
+
 
 class Tenant(dict):
 
@@ -32,9 +34,25 @@ class Tenant(dict):
     @property
     def users(self):
         """
-        :return: The list of users connected to the tenant.
+        :return: The users connected to the tenant and their roles in it.
         """
         return self.get('users')
+
+    @property
+    def direct_users(self):
+        """
+        :return: The users connected directly to the tenant (not via groups)
+        and their roles in it.
+        """
+        return self.get('user_roles', {}).get('direct')
+
+    @property
+    def group_users(self):
+        """
+        :return: The users connected to the tenant via groups and their roles
+        in it.
+        """
+        return self.get('user_roles', {}).get('groups')
 
     @property
     def groups(self):
@@ -78,9 +96,39 @@ class TenantsClient(object):
 
         return Tenant(response)
 
-    def add_user(self, username, tenant_name):
-        data = {'username': username, 'tenant_name': tenant_name}
+    def add_user(self, username, tenant_name, role):
+        """Add user to a tenant.
+
+        :param username: Name of the user to add to the tenant
+        :param tenant_name: Name of the tenant to which the user is added
+        :param role: Name of the role assigned to the user in the tenant
+
+        """
+        data = {
+            'username': username,
+            'tenant_name': tenant_name,
+            'role': role,
+        }
         response = self.api.put('/tenants/users', data=data)
+        return Tenant(response)
+
+    def update_user(self, username, tenant_name, role):
+        """Update user in a tenant.
+
+        :param username: Name of the user to add to the tenant
+        :type username: str
+        :param tenant_name: Name of the tenant to which the user is added
+        :type tenant_name: str
+        :param role: Name of the role assigned to the user in the tenant
+        :type role: str
+
+        """
+        data = {
+            'username': username,
+            'tenant_name': tenant_name,
+            'role': role,
+        }
+        response = self.api.patch('/tenants/users', data=data)
         return Tenant(response)
 
     def remove_user(self, username, tenant_name):
@@ -88,12 +136,50 @@ class TenantsClient(object):
         response = self.api.delete('/tenants/users', data=data)
         return Tenant(response)
 
-    def add_group(self, group_name, tenant_name):
-        data = {'group_name': group_name, 'tenant_name': tenant_name}
+    def add_user_group(self, group_name, tenant_name, role):
+        """Add user group to a tenant.
+
+        :param group_name: Name of the group to add to the tenant
+        :param tenant_name: Name of the tenant to which the group is added
+        :param role: Name of the role assigned to the members of the group
+
+        """
+        data = {
+            'group_name': group_name,
+            'tenant_name': tenant_name,
+            'role': role,
+        }
         response = self.api.put('/tenants/user-groups', data=data)
         return Tenant(response)
 
-    def remove_group(self, group_name, tenant_name):
+    def update_user_group(self, group_name, tenant_name, role):
+        """Update user group in a tenant.
+
+        :param group_name: Name of the user to add to the tenant
+        :type group_name: str
+        :param tenant_name: Name of the tenant to which the group is added
+        :type tenant_name: str
+        :param role: Name of the role assigned to the user in the tenant
+        :type role: str
+
+        """
+        data = {
+            'group_name': group_name,
+            'tenant_name': tenant_name,
+            'role': role,
+        }
+        response = self.api.patch('/tenants/user-groups', data=data)
+        return Tenant(response)
+
+    def remove_user_group(self, group_name, tenant_name):
+        """Remove user group from tenant.
+
+        :param group_name: Name of the user to add to the tenant
+        :type group_name: str
+        :param tenant_name: Name of the tenant to which the user is added
+        :type tenant_name: str
+
+        """
         data = {'group_name': group_name, 'tenant_name': tenant_name}
         response = self.api.delete('/tenants/user-groups', data=data)
         return Tenant(response)

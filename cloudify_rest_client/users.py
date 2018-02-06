@@ -37,6 +37,13 @@ class User(dict):
         return self.get('role')
 
     @property
+    def group_system_roles(self):
+        """
+        :return: The roles assigned to the user via groups.
+        """
+        return self.get('group_system_roles')
+
+    @property
     def groups(self):
         """
         :return: The list of groups to which the user is connected.
@@ -49,6 +56,21 @@ class User(dict):
         :return: The list of tenants to which the user is connected.
         """
         return self.get('tenants')
+
+    @property
+    def user_tenants(self):
+        """
+        :return: The list of tenants to which the user is connected directly
+        (not via groups).
+        """
+        return self.get('tenant_roles', {}).get('direct')
+
+    @property
+    def group_tenants(self):
+        """
+        :return: The list of tenants to which the user is connected via groups.
+        """
+        return self.get('tenant_roles', {}).get('groups')
 
     @property
     def active(self):
@@ -111,6 +133,10 @@ class UsersClient(object):
             '/users/{0}'.format(username),
             params=kwargs
         )
+        return User(response)
+
+    def get_self(self, **kwargs):
+        response = self.api.get('/user', params=kwargs)
         return User(response)
 
     def delete(self, username):

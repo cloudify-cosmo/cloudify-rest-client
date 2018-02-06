@@ -111,7 +111,8 @@ class SnapshotsClient(object):
                snapshot_id,
                include_metrics,
                include_credentials,
-               private_resource=False):
+               include_logs=True,
+               include_events=True):
         """
         Creates a new snapshot.
 
@@ -123,7 +124,8 @@ class SnapshotsClient(object):
         params = {
             'include_metrics': include_metrics,
             'include_credentials': include_credentials,
-            'private_resource': private_resource
+            'include_logs': include_logs,
+            'include_events': include_events
         }
         response = self.api.put(uri, data=params, expected_status_code=201)
         return Execution(response)
@@ -143,7 +145,8 @@ class SnapshotsClient(object):
                 snapshot_id,
                 recreate_deployments_envs=True,
                 force=False,
-                tenant_name=None):
+                restore_certificates=False,
+                no_reboot=False):
         """
         Restores the snapshot whose id matches the provided snapshot id.
 
@@ -152,15 +155,17 @@ class SnapshotsClient(object):
         deployment environments.
         :param force: Skip clearing the manager and checking whether it is
         actually clean.
-        :param tenant_name: Name of the tenant to which old (pre 4.0)
-        snapshots should be restored
+        :param restore_certificates: Whether to try and restore the
+        certificates from the snapshot.
+        :param no_reboot: Do not reboot after certificates restore.
         """
         assert snapshot_id
         uri = '/snapshots/{0}/restore'.format(snapshot_id)
         params = {
             'recreate_deployments_envs': recreate_deployments_envs,
             'force': force,
-            'tenant_name': tenant_name
+            'restore_certificates': restore_certificates,
+            'no_reboot': no_reboot
         }
         response = self.api.post(uri, data=params)
         return Execution(response)
@@ -168,14 +173,12 @@ class SnapshotsClient(object):
     def upload(self,
                snapshot_path,
                snapshot_id,
-               private_resource=False,
                progress_callback=None):
         """
         Uploads snapshot archive to Cloudify's manager.
 
         :param snapshot_path: Path to snapshot archive.
         :param snapshot_id: Id of the uploaded snapshot.
-        :param private_resource: Whether the blueprint should be private
         :param progress_callback: Progress bar callback method
         :return: Uploaded snapshot.
 
@@ -187,7 +190,7 @@ class SnapshotsClient(object):
         assert snapshot_id
 
         uri = '/snapshots/{0}/archive'.format(snapshot_id)
-        query_params = {'private_resource': private_resource}
+        query_params = {}
 
         if urlparse.urlparse(snapshot_path).scheme and \
                 not os.path.exists(snapshot_path):
@@ -233,21 +236,3 @@ class SnapshotsClient(object):
         if error:
             params['error'] = error
         self.api.patch(uri, data=params)
-
-    def add_permission(self, snapshot_id, users, permission):
-        params = {
-            'resource_type': 'snapshot',
-            'resource_id': snapshot_id,
-            'users': users,
-            'permission': permission
-        }
-        return self.api.put('/permissions', data=params)
-
-    def remove_permission(self, snapshot_id, users, permission):
-        params = {
-            'resource_type': 'snapshot',
-            'resource_id': snapshot_id,
-            'users': users,
-            'permission': permission
-        }
-        return self.api.delete('/permissions', data=params)

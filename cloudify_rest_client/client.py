@@ -44,12 +44,13 @@ from cloudify_rest_client.cluster import ClusterClient
 from cloudify_rest_client.ldap import LdapClient
 from cloudify_rest_client.secrets import SecretsClient
 
+from . import aria
 
 DEFAULT_PORT = 80
 SECURED_PORT = 443
 SECURED_PROTOCOL = 'https'
 DEFAULT_PROTOCOL = 'http'
-DEFAULT_API_VERSION = 'v3'
+DEFAULT_API_VERSION = 'v3.1'
 BASIC_AUTH_PREFIX = 'Basic'
 CLOUDIFY_TENANT_HEADER = 'Tenant'
 CLOUDIFY_AUTHENTICATION_HEADER = 'Authorization'
@@ -59,6 +60,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecurePlatformWarning)
 
 
 class HTTPClient(object):
+    default_timeout_sec = None
 
     def __init__(self, host, port=DEFAULT_PORT,
                  protocol=DEFAULT_PROTOCOL, api_version=DEFAULT_API_VERSION,
@@ -113,18 +115,20 @@ class HTTPClient(object):
             message=message,
             error_code=code,
             status_code=response.status_code,
-            server_traceback=server_traceback)
+            server_traceback=server_traceback,
+            response=response)
 
     @staticmethod
     def _prepare_and_raise_exception(message,
                                      error_code,
                                      status_code,
-                                     server_traceback=None):
+                                     server_traceback=None,
+                                     response=None):
 
         error = exceptions.ERROR_MAPPING.get(error_code,
                                              exceptions.CloudifyClientError)
         raise error(message, server_traceback,
-                    status_code, error_code=error_code)
+                    status_code, error_code=error_code, response=response)
 
     def verify_response_status(self, response, expected_code=200):
         if response.status_code != expected_code:
@@ -138,7 +142,7 @@ class HTTPClient(object):
                                    headers=headers,
                                    stream=stream,
                                    verify=verify,
-                                   timeout=timeout)
+                                   timeout=timeout or self.default_timeout_sec)
         if self.logger.isEnabledFor(logging.DEBUG):
             for hdr, hdr_content in response.request.headers.iteritems():
                 self.logger.debug('request header:  %s: %s'
@@ -164,11 +168,14 @@ class HTTPClient(object):
         return response_json
 
     def get_request_verify(self):
+        # disable certificate verification if user asked us to.
+        if self.trust_all:
+            return False
+        # verify will hold the path to the self-signed certificate
         if self.cert:
-            # verify will hold the path to the self-signed certificate
             return self.cert
-        # certificate verification is required iff trust_all is False
-        return not self.trust_all
+        # verify the certificate
+        return True
 
     def do_request(self,
                    requests_method,
@@ -209,11 +216,22 @@ class HTTPClient(object):
             elif data is not None:
                 log_message += '; body: bytes data'
             self.logger.debug(log_message)
-        return self._do_request(
-            requests_method=requests_method, request_url=request_url,
-            body=body, params=total_params, headers=total_headers,
-            expected_status_code=expected_status_code, stream=stream,
-            verify=self.get_request_verify(), timeout=timeout)
+        try:
+            return self._do_request(
+                requests_method=requests_method, request_url=request_url,
+                body=body, params=total_params, headers=total_headers,
+                expected_status_code=expected_status_code, stream=stream,
+                verify=self.get_request_verify(), timeout=timeout)
+        except requests.exceptions.SSLError as e:
+            raise requests.exceptions.SSLError(
+                'An SSL-related error has occurred. This can happen if the '
+                'specified REST certificate does not match the certificate on '
+                'the manager. Underlying reason: {0}'.format(e))
+        except requests.exceptions.ConnectionError as e:
+            raise requests.exceptions.ConnectionError(
+                '{0}\nThis can happen when the manager is not working with '
+                'SSL, but the client does'.format(e)
+            )
 
     def get(self, uri, data=None, params=None, headers=None, _include=None,
             expected_status_code=200, stream=False, versioned_url=True,
@@ -373,3 +391,14 @@ class CloudifyClient(object):
         self.cluster = ClusterClient(self._client)
         self.ldap = LdapClient(self._client)
         self.secrets = SecretsClient(self._client)
+
+        # ARIA clients
+        self.aria_service_templates = \
+            aria.service_templates.ServiceTemplateClient(self._client)
+        self.aria_services = aria.services.ServiceClient(self._client)
+        self.aria_node_templates = \
+            aria.node_templates.NodeTemplatesClient(self._client)
+        self.aria_nodes = aria.nodes.NodesClient(self._client)
+        self.aria_executions = aria.executions.ExecutionsClient(self._client)
+        self.aria_logs = aria.logs.LogsClient(self._client)
+        self.aria_plugins = aria.plugins.PluginsClient(self._client)
