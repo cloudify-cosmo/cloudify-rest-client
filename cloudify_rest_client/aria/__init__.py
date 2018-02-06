@@ -1,5 +1,5 @@
 ########
-# Copyright (c) 2013 GigaSpaces Technologies Ltd. All rights reserved
+# Copyright (c) 2017 GigaSpaces Technologies Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,18 +13,12 @@
 #    * See the License for the specific language governing permissions and
 #    * limitations under the License.
 
-from setuptools import setup, find_packages
-
-setup(
-    name='cloudify-rest-client',
-    version='4.3',
-    author='cosmo-admin',
-    author_email='cosmo-admin@gigaspaces.com',
-    packages=find_packages(include=['cloudify_rest_client*']),
-    license='LICENSE',
-    description='Cloudify REST client',
-    install_requires=[
-        'requests>=2.7.0,<3.0.0',
-        'requests_toolbelt',
-    ]
+from . import (                                                     # noqa
+    executions,
+    logs,
+    node_templates,
+    nodes,
+    plugins,
+    service_templates,
+    services,
 )

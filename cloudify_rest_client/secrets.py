@@ -14,6 +14,7 @@
 #    * limitations under the License.
 
 from cloudify_rest_client.responses import ListResponse
+from cloudify_rest_client.constants import VisibilityState
 
 
 class Secret(dict):
@@ -56,16 +57,38 @@ class SecretsClient(object):
     def __init__(self, api):
         self.api = api
 
-    def create(self, key, value):
-        data = {'value': value}
-        response = self.api.put('/secrets/{0}'.format(key), data=data)
+    def create(self,
+               key,
+               value,
+               update_if_exists=False,
+               visibility=VisibilityState.TENANT):
+        """Create secret.
 
+        :param key: Secret key
+        :type key: unicode
+        :param value: Secret value
+        :type value: unicode
+        :param update_if_exists:
+            Update secret value if secret key already exists
+        :type update_if_exists: bool
+        :param visibility: The visibility of the secret, can be 'private',
+                           'tenant' or 'global'
+        :type visibility: unicode
+        :returns: New secret metadata
+        :rtype: Dict[str]
+
+        """
+        data = {
+            'value': value,
+            'update_if_exists': update_if_exists,
+            'visibility': visibility
+        }
+        response = self.api.put('/secrets/{0}'.format(key), data=data)
         return Secret(response)
 
     def update(self, key, value):
         data = {'value': value}
         response = self.api.patch('/secrets/{0}'.format(key), data=data)
-
         return Secret(response)
 
     def get(self, key):
@@ -97,9 +120,28 @@ class SecretsClient(object):
 
     def set_global(self, key):
         """
-        Updates the secret's availability to global
+        Updates the secret's visibility to global
 
         :param key: Secret's key to update.
         :return: The secret.
         """
-        return self.api.patch('/secrets/{0}/set-global'.format(key))
+        data = {'visibility': VisibilityState.GLOBAL}
+        return self.api.patch(
+            '/secrets/{0}/set-visibility'.format(key),
+            data=data
+        )
+
+    def set_visibility(self, key, visibility):
+        """
+        Updates the secret's visibility
+
+        :param key: Secret's key to update.
+        :param visibility: The visibility to update, should be 'tenant'
+                           or 'global'.
+        :return: The secret.
+        """
+        data = {'visibility': visibility}
+        return self.api.patch(
+            '/secrets/{0}/set-visibility'.format(key),
+            data=data
+        )

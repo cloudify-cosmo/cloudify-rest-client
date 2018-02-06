@@ -34,9 +34,25 @@ class Tenant(dict):
     @property
     def users(self):
         """
-        :return: The list of users connected to the tenant.
+        :return: The users connected to the tenant and their roles in it.
         """
         return self.get('users')
+
+    @property
+    def direct_users(self):
+        """
+        :return: The users connected directly to the tenant (not via groups)
+        and their roles in it.
+        """
+        return self.get('user_roles', {}).get('direct')
+
+    @property
+    def group_users(self):
+        """
+        :return: The users connected to the tenant via groups and their roles
+        in it.
+        """
+        return self.get('user_roles', {}).get('groups')
 
     @property
     def groups(self):
@@ -80,20 +96,14 @@ class TenantsClient(object):
 
         return Tenant(response)
 
-    def add_user(self, username, tenant_name, role=None):
+    def add_user(self, username, tenant_name, role):
         """Add user to a tenant.
-
-        Optionally, set the role of the user in the context of the tenant in
-        which it has been added.
 
         :param username: Name of the user to add to the tenant
         :param tenant_name: Name of the tenant to which the user is added
         :param role: Name of the role assigned to the user in the tenant
 
         """
-        if role is None:
-            role = DEFAULT_TENANT_ROLE
-
         data = {
             'username': username,
             'tenant_name': tenant_name,
@@ -126,19 +136,14 @@ class TenantsClient(object):
         response = self.api.delete('/tenants/users', data=data)
         return Tenant(response)
 
-    def add_group(self, group_name, tenant_name, role=None):
-        """Add group to a tenant.
-
-        Optionally, set the role that will be assigned to the users members of
-        the group that is added to the tenant.
+    def add_user_group(self, group_name, tenant_name, role):
+        """Add user group to a tenant.
 
         :param group_name: Name of the group to add to the tenant
         :param tenant_name: Name of the tenant to which the group is added
         :param role: Name of the role assigned to the members of the group
 
         """
-        if role is None:
-            role = DEFAULT_TENANT_ROLE
         data = {
             'group_name': group_name,
             'tenant_name': tenant_name,
@@ -147,12 +152,12 @@ class TenantsClient(object):
         response = self.api.put('/tenants/user-groups', data=data)
         return Tenant(response)
 
-    def update_group(self, group_name, tenant_name, role):
-        """Update group in a tenant.
+    def update_user_group(self, group_name, tenant_name, role):
+        """Update user group in a tenant.
 
         :param group_name: Name of the user to add to the tenant
         :type group_name: str
-        :param tenant_name: Name of the tenant to which the user is added
+        :param tenant_name: Name of the tenant to which the group is added
         :type tenant_name: str
         :param role: Name of the role assigned to the user in the tenant
         :type role: str
@@ -166,7 +171,15 @@ class TenantsClient(object):
         response = self.api.patch('/tenants/user-groups', data=data)
         return Tenant(response)
 
-    def remove_group(self, group_name, tenant_name):
+    def remove_user_group(self, group_name, tenant_name):
+        """Remove user group from tenant.
+
+        :param group_name: Name of the user to add to the tenant
+        :type group_name: str
+        :param tenant_name: Name of the tenant to which the user is added
+        :type tenant_name: str
+
+        """
         data = {'group_name': group_name, 'tenant_name': tenant_name}
         response = self.api.delete('/tenants/user-groups', data=data)
         return Tenant(response)
