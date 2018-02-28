@@ -390,4 +390,3 @@ class CloudifyClient(object):
         self.cluster = ClusterClient(self._client)
         self.ldap = LdapClient(self._client)
         self.secrets = SecretsClient(self._client)
-
