@@ -14,11 +14,13 @@
 #    * limitations under the License.
 
 import os
+import json
 import tempfile
 import shutil
 import urllib
 import urlparse
 import contextlib
+from base64 import urlsafe_b64encode
 
 from cloudify_rest_client import utils
 from cloudify_rest_client import bytes_stream_utils
@@ -91,8 +93,16 @@ class BlueprintsClient(object):
                 blueprint_id,
                 application_file_name=None,
                 visibility=VisibilityState.TENANT,
-                progress_callback=None):
+                progress_callback=None,
+                render=None):
         query_params = {'visibility': visibility}
+
+        # We need this ugly hack because we're potentially sending a stream,
+        # and right now there's no way around it
+        if render:
+            parsed_render = urlsafe_b64encode(json.dumps(render))
+            query_params['render'] = parsed_render
+
         if application_file_name is not None:
             query_params['application_file_name'] = \
                 urllib.quote(application_file_name)
@@ -183,7 +193,8 @@ class BlueprintsClient(object):
                path,
                entity_id,
                visibility=VisibilityState.TENANT,
-               progress_callback=None):
+               progress_callback=None,
+               render=None):
         """
         Uploads a blueprint to Cloudify's manager.
 
@@ -210,7 +221,8 @@ class BlueprintsClient(object):
                 blueprint_id=entity_id,
                 application_file_name=application_file,
                 visibility=visibility,
-                progress_callback=progress_callback)
+                progress_callback=progress_callback,
+                render=render)
             return self._wrapper_cls(blueprint)
         finally:
             shutil.rmtree(tempdir)
