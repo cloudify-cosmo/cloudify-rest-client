@@ -43,6 +43,7 @@ from cloudify_rest_client.users import UsersClient
 from cloudify_rest_client.cluster import ClusterClient
 from cloudify_rest_client.ldap import LdapClient
 from cloudify_rest_client.secrets import SecretsClient
+from cloudify_rest_client.manager_config import ManagerConfigClient
 
 
 DEFAULT_PORT = 80
@@ -390,3 +391,4 @@ class CloudifyClient(object):
         self.cluster = ClusterClient(self._client)
         self.ldap = LdapClient(self._client)
         self.secrets = SecretsClient(self._client)
+        self.manager_config = ManagerConfigClient(self._client)
