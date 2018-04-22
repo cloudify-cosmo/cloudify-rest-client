@@ -204,8 +204,9 @@ class BlueprintsClient(object):
         try:
             tar_path = utils.tar_blueprint(path, tempdir)
             if os.path.getsize(tar_path) > 10000000:
-                raise Exception('Blueprint folder exceeds 10M, '
-                                'use external resources for lareg files.')
+                raise Exception('Blueprint folder exceeds 10 MB, '
+                                'use external resources for large files '
+                                'or provide a complete archive file instead.')
             application_file = os.path.basename(path)
 
             blueprint = self._upload(
