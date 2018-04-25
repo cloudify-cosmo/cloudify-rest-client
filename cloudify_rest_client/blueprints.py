@@ -206,7 +206,7 @@ class BlueprintsClient(object):
         tempdir = tempfile.mkdtemp()
         try:
             tar_path = utils.tar_blueprint(path, tempdir)
-            if (not skip_size_limit) and (os.path.getsize(tar_path) > 30000000):
+            if not skip_size_limit and os.path.getsize(tar_path) > 30000000:
                 raise Exception('Blueprint folder exceeds 30 MB, '
                                 'move some resources from the blueprint '
                                 'folder to an external location or upload'
