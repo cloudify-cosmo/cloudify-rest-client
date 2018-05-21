@@ -101,8 +101,8 @@ class HTTPClient(object):
 
     @staticmethod
     def _kerberos_env():
-        if os.path.exists('/etc/krb5.conf'):
-            return True
+        # TODO implement detecting if kerberos is configured
+        # and should be used
         return False
 
     def _raise_client_error(self, response, url=None):
