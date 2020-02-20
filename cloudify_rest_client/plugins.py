@@ -14,7 +14,7 @@
 #    * limitations under the License.
 
 import os
-import urlparse
+import urllib.parse
 import contextlib
 
 from cloudify_rest_client import bytes_stream_utils
@@ -222,7 +222,7 @@ class PluginsClient(object):
         assert plugin_path
         query_params = {'visibility': visibility}
         timeout = self.api.default_timeout_sec
-        if urlparse.urlparse(plugin_path).scheme and \
+        if urllib.parse.urlparse(plugin_path).scheme and \
                 not os.path.exists(plugin_path):
             query_params['plugin_archive_url'] = plugin_path
             data = None

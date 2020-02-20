@@ -23,10 +23,12 @@ class CloudifyClientError(Exception):
         self.error_code = error_code
         self.server_traceback = server_traceback
         self.response = response
+        self.message = message
 
     def __str__(self):
         if self.status_code != -1:
-            return '{0}: {1}'.format(self.status_code, self.message)
+            formatted_error = '{0}: {1}'.format(self.status_code, self.message)
+            return formatted_error
         return self.message
 
 

@@ -15,9 +15,9 @@
 
 import os
 import json
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import shutil
-import urlparse
+import urllib.parse
 import tempfile
 
 from mimetypes import MimeTypes
@@ -149,11 +149,11 @@ class DeploymentUpdatesClient(object):
 
         if application_file_name:
             params['application_file_name'] = \
-                urllib.quote(application_file_name)
+                urllib.parse.quote(application_file_name)
 
         # For a Windows path (e.g. "C:\aaa\bbb.zip") scheme is the
         # drive letter and therefore the 2nd condition is present
-        if all([urlparse.urlparse(archive_path).scheme,
+        if all([urllib.parse.urlparse(archive_path).scheme,
                 not os.path.exists(archive_path)]):
             # archive location is URL
             params['blueprint_archive_url'] = archive_path
@@ -162,7 +162,7 @@ class DeploymentUpdatesClient(object):
                 os.path.basename(archive_path),
                 open(archive_path, 'rb'),
                 # Guess the archive mime type
-                mime_types.guess_type(urllib.pathname2url(archive_path)))
+                mime_types.guess_type(urllib.request.pathname2url(archive_path)))
 
         return data_form, params
 
